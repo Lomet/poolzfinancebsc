@@ -22,8 +22,10 @@ import {
   TransferInETH,
   TransferOut,
   TransferOutETH,
-  Unpaused
+  Unpaused,
+  Invested
 } from "../generated/schema"
+
 
 export function handleFinishPool(event: FinishPoolEvent): void {
   let entity = new FinishPool(
@@ -36,6 +38,21 @@ export function handleFinishPool(event: FinishPoolEvent): void {
   entity.transactionHash = event.transaction.hash
 
   entity.save()
+
+  let transferIn = TransferIn.loadInBlock(event.transaction.hash)
+  let transferInEth = TransferInETH.loadInBlock(event.transaction.hash)
+  let transferOut = TransferOut.loadInBlock(event.transaction.hash)
+
+  let IsErc20 = transferInEth == null
+ 
+  let InvestedEntity = new Invested(
+    event.transaction.hash.concatI32(event.logIndex.toI32()))
+  InvestedEntity.investor = event.transaction.from
+  InvestedEntity.internal_id = event.params.id
+  InvestedEntity.IsErc20 = IsErc20
+  InvestedEntity.amountIn = IsErc20? transferIn!.Amount : transferInEth!.Amount
+  InvestedEntity.amountOut = transferOut!.Amount
+  InvestedEntity.save()
 }
 
 export function handleNewInvestorEvent(event: NewInvestorEventEvent): void {
@@ -107,6 +124,21 @@ export function handlePoolUpdate(event: PoolUpdateEvent): void {
   entity.transactionHash = event.transaction.hash
 
   entity.save()
+
+  let transferIn = TransferIn.loadInBlock(event.transaction.hash)
+  let transferInEth = TransferInETH.loadInBlock(event.transaction.hash)
+  let transferOut = TransferOut.loadInBlock(event.transaction.hash)
+
+  let IsErc20 = transferInEth == null
+ 
+  let InvestedEntity = new Invested(
+    event.transaction.hash.concatI32(event.logIndex.toI32()))
+  InvestedEntity.investor = event.transaction.from
+  InvestedEntity.internal_id = event.params.id
+  InvestedEntity.IsErc20 = IsErc20
+  InvestedEntity.amountIn = IsErc20? transferIn!.Amount : transferInEth!.Amount
+  InvestedEntity.amountOut = transferOut!.Amount
+  InvestedEntity.save()
 }
 
 export function handleTransferIn(event: TransferInEvent): void {

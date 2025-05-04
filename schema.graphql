@@ -95,3 +95,13 @@ type Unpaused @entity(immutable: true) {
   blockTimestamp: BigInt!
   transactionHash: Bytes!
 }
+
+type Invested @entity(immutable: true) {
+  id: Bytes!            # tx hash (same for every child event)
+  internal_id: BigInt!   # pool’s ID – filled by PoolUpdate / FinishPool
+  investor: Bytes!      # first address that deposited – filled by TransferIn/ETH
+  timestamp: BigInt!
+  IsErc20: Boolean!    # if this pool main coin is 0x0 or there is some Erc20 as input
+  amountIn: BigInt!    # this can be from transferin or transferinETH
+  amountOut: BigInt!   # this is TransferOut - make usre the TransferOut is not the fee when its IsErc20
+}
