@@ -186,7 +186,7 @@ export function handleFinishPool(event: FinishPoolEvent): void {
 }
 
 function AddInvest(hash: Bytes, logIndex: i32, id: BigInt, from: Bytes, timestamp: BigInt): void {
-  let transferIn = null
+  let transferIn = null as TransferIn | null
   let transferInEth = TransferInETH.loadInBlock(hash.concatI32(logIndex-8))
   if (transferInEth == null) {
     transferInEth = TransferInETH.loadInBlock(hash.concatI32(logIndex-7))
