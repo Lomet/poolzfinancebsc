@@ -200,6 +200,10 @@ function AddInvest(hash: Bytes, logIndex: i32, id: BigInt, from: Bytes, timestam
     {
       transferIn = TransferIn.loadInBlock(hash.concatI32(logIndex-9))
     }    
+    if (transferIn == null)
+      {
+        transferIn = TransferIn.loadInBlock(hash.concatI32(logIndex-6))
+      }  
   }
   let amount = transferInEth == null? transferIn!.Amount : transferInEth.Amount
 
