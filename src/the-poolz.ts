@@ -1,15 +1,16 @@
+import { BigInt, Bytes } from '@graphprotocol/graph-ts';
 import {
-  FinishPool as FinishPoolEvent,
   NewInvestorEvent as NewInvestorEventEvent,
   NewPool as NewPoolEvent,
   OwnershipTransferred as OwnershipTransferredEvent,
   Paused as PausedEvent,
-  PoolUpdate as PoolUpdateEvent,
   TransferIn as TransferInEvent,
   TransferInETH as TransferInETHEvent,
   TransferOut as TransferOutEvent,
   TransferOutETH as TransferOutETHEvent,
-  Unpaused as UnpausedEvent
+  Unpaused as UnpausedEvent,
+  PoolUpdate as PoolUpdateEvent,
+  FinishPool as FinishPoolEvent,
 } from "../generated/ThePoolz/ThePoolz"
 import {
   FinishPool,
@@ -23,37 +24,8 @@ import {
   TransferOut,
   TransferOutETH,
   Unpaused,
-  Invested
+  Invested,
 } from "../generated/schema"
-
-
-export function handleFinishPool(event: FinishPoolEvent): void {
-  let entity = new FinishPool(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.internal_id = event.params.id
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
-
-  let transferIn = TransferIn.loadInBlock(event.transaction.hash)
-  let transferInEth = TransferInETH.loadInBlock(event.transaction.hash)
-  let transferOut = TransferOut.loadInBlock(event.transaction.hash)
-
-  let IsErc20 = transferInEth == null
- 
-  let InvestedEntity = new Invested(
-    event.transaction.hash.concatI32(event.logIndex.toI32()))
-  InvestedEntity.investor = event.transaction.from
-  InvestedEntity.internal_id = event.params.id
-  InvestedEntity.IsErc20 = IsErc20
-  InvestedEntity.amountIn = IsErc20? transferIn!.Amount : transferInEth!.Amount
-  InvestedEntity.amountOut = transferOut!.Amount
-  InvestedEntity.save()
-}
 
 export function handleNewInvestorEvent(event: NewInvestorEventEvent): void {
   let entity = new NewInvestorEvent(
@@ -111,34 +83,6 @@ export function handlePaused(event: PausedEvent): void {
   entity.transactionHash = event.transaction.hash
 
   entity.save()
-}
-
-export function handlePoolUpdate(event: PoolUpdateEvent): void {
-  let entity = new PoolUpdate(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.internal_id = event.params.id
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
-
-  let transferIn = TransferIn.loadInBlock(event.transaction.hash)
-  let transferInEth = TransferInETH.loadInBlock(event.transaction.hash)
-  let transferOut = TransferOut.loadInBlock(event.transaction.hash)
-
-  let IsErc20 = transferInEth == null
- 
-  let InvestedEntity = new Invested(
-    event.transaction.hash.concatI32(event.logIndex.toI32()))
-  InvestedEntity.investor = event.transaction.from
-  InvestedEntity.internal_id = event.params.id
-  InvestedEntity.IsErc20 = IsErc20
-  InvestedEntity.amountIn = IsErc20? transferIn!.Amount : transferInEth!.Amount
-  InvestedEntity.amountOut = transferOut!.Amount
-  InvestedEntity.save()
 }
 
 export function handleTransferIn(event: TransferInEvent): void {
@@ -210,4 +154,52 @@ export function handleUnpaused(event: UnpausedEvent): void {
   entity.transactionHash = event.transaction.hash
 
   entity.save()
+}
+
+export function handlePoolUpdate(event: PoolUpdateEvent): void {
+  let entity = new PoolUpdate(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  entity.internal_id = event.params.id
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.save()
+
+  AddInvest(event.transaction.hash, event.logIndex.toI32(), event.params.id, event.transaction.from, event.block.timestamp)
+}
+
+export function handleFinishPool(event: FinishPoolEvent): void {
+  let entity = new FinishPool(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  entity.internal_id = event.params.id
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.save()
+  AddInvest(event.transaction.hash, event.logIndex.toI32(), event.params.id, event.transaction.from, event.block.timestamp)
+}
+
+function AddInvest(hash: Bytes, logIndex: i32, id: BigInt, from: Bytes, timestamp: BigInt): void {
+  let transferInEth = TransferInETH.loadInBlock(hash.concatI32(logIndex-8))
+  if (transferInEth == null) {
+    transferInEth = TransferInETH.loadInBlock(hash.concatI32(logIndex-5))
+  }
+  if (transferInEth == null) {
+    transferInEth = TransferInETH.loadInBlock(hash.concatI32(logIndex-7))
+  }
+
+  let InvestedEntity = new Invested(
+    hash.concatI32(logIndex))
+  InvestedEntity.investor = from
+  InvestedEntity.internal_id = id
+  InvestedEntity.IsErc20 = transferInEth == null
+  InvestedEntity.timestamp = timestamp
+  InvestedEntity.amountIn = transferInEth == null? TransferIn.loadInBlock(hash)!.Amount : transferInEth.Amount
+  InvestedEntity.save()
 }
