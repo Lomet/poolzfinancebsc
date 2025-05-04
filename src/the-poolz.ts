@@ -186,24 +186,19 @@ export function handleFinishPool(event: FinishPoolEvent): void {
 }
 
 function AddInvest(hash: Bytes, logIndex: i32, id: BigInt, from: Bytes, timestamp: BigInt): void {
-  let transferIn = null as TransferIn | null
-  let transferInEth = TransferInETH.loadInBlock(hash.concatI32(logIndex - 8))
-  if (transferInEth == null) {
-    transferInEth = TransferInETH.loadInBlock(hash.concatI32(logIndex - 7))
-  }
-  if (transferInEth == null) {
-    transferInEth = TransferInETH.loadInBlock(hash.concatI32(logIndex - 5))
-  }
-  if (transferInEth == null) {
-    transferIn = TransferIn.loadInBlock(hash.concatI32(logIndex - 5))
+  const transferInEth = loadTransferInETH(hash, logIndex);
+
+  let amount: BigInt;
+  
+  if (transferInEth) {                         // found an ETH event
+    amount = transferInEth.Amount;
+  } else {                                     // fall back to ERC-20 event
+    const transferIn = loadTransferIn(hash, logIndex);
     if (transferIn == null) {
-      transferIn = TransferIn.loadInBlock(hash.concatI32(logIndex - 9))
+      return;                                  // or handle however you like
     }
-    if (transferIn == null) {
-      transferIn = TransferIn.loadInBlock(hash.concatI32(logIndex - 6))
-    }
+    amount = transferIn.Amount;
   }
-  let amount = transferInEth == null ? transferIn!.Amount : transferInEth.Amount
 
   let InvestedEntity = new Invested(
     hash.concatI32(logIndex))
@@ -213,4 +208,22 @@ function AddInvest(hash: Bytes, logIndex: i32, id: BigInt, from: Bytes, timestam
   InvestedEntity.timestamp = timestamp
   InvestedEntity.amountIn = amount
   InvestedEntity.save()
+}
+
+function loadTransferInETH(hash: Bytes, logIndex: i32): TransferInETH | null {
+  const OFFSETS: i32[] = [-8, -7, -5];
+  for (let i = 0; i < OFFSETS.length; i++) {
+    const ent = TransferInETH.loadInBlock(hash.concatI32(logIndex - OFFSETS[i]));
+    if (ent != null) return ent;
+  }
+  return null;
+}
+
+function loadTransferIn(hash: Bytes, logIndex: i32): TransferIn | null {
+  const OFFSETS: i32[] = [-9, -6, -5];
+  for (let i = 0; i < OFFSETS.length; i++) {
+    const ent = TransferIn.loadInBlock(hash.concatI32(logIndex - OFFSETS[i]));
+    if (ent != null) return ent;
+  }
+  return null;
 }
