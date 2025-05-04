@@ -188,10 +188,10 @@ export function handleFinishPool(event: FinishPoolEvent): void {
 function AddInvest(hash: Bytes, logIndex: i32, id: BigInt, from: Bytes, timestamp: BigInt): void {
   let transferInEth = TransferInETH.loadInBlock(hash.concatI32(logIndex-8))
   if (transferInEth == null) {
-    transferInEth = TransferInETH.loadInBlock(hash.concatI32(logIndex-5))
+    transferInEth = TransferInETH.loadInBlock(hash.concatI32(logIndex-7))
   }
   if (transferInEth == null) {
-    transferInEth = TransferInETH.loadInBlock(hash.concatI32(logIndex-7))
+    transferInEth = TransferInETH.loadInBlock(hash.concatI32(logIndex-5))
   }
 
   let InvestedEntity = new Invested(
@@ -200,6 +200,6 @@ function AddInvest(hash: Bytes, logIndex: i32, id: BigInt, from: Bytes, timestam
   InvestedEntity.internal_id = id
   InvestedEntity.IsErc20 = transferInEth == null
   InvestedEntity.timestamp = timestamp
-  InvestedEntity.amountIn = transferInEth == null? TransferIn.loadInBlock(hash)!.Amount : transferInEth.Amount
+  InvestedEntity.amountIn = transferInEth == null? TransferIn.loadInBlock(hash.concatI32(logIndex-5))!.Amount : transferInEth.Amount
   InvestedEntity.save()
 }
