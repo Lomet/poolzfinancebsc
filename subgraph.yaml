@@ -1,0 +1,56 @@
+specVersion: 1.3.0
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: ThePoolz
+    network: bsc
+    source:
+      address: "0xCc8f6A82Ff034C15dFDAcBcab29F7Ea28C616EF7"
+      abi: ThePoolz
+      startBlock: 9088178
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - FinishPool
+        - NewInvestorEvent
+        - NewPool
+        - OwnershipTransferred
+        - Paused
+        - PoolUpdate
+        - TransferIn
+        - TransferInETH
+        - TransferOut
+        - TransferOutETH
+        - Unpaused
+      abis:
+        - name: ThePoolz
+          file: ./abis/ThePoolz.json
+      eventHandlers:
+        - event: FinishPool(uint256)
+          handler: handleFinishPool
+        - event: NewInvestorEvent(uint256,address,uint256)
+          handler: handleNewInvestorEvent
+        - event: NewPool(address,uint256)
+          handler: handleNewPool
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+        - event: Paused(address)
+          handler: handlePaused
+        - event: PoolUpdate(uint256)
+          handler: handlePoolUpdate
+        - event: TransferIn(uint256,address,address)
+          handler: handleTransferIn
+        - event: TransferInETH(uint256,address)
+          handler: handleTransferInETH
+        - event: TransferOut(uint256,address,address)
+          handler: handleTransferOut
+        - event: TransferOutETH(uint256,address)
+          handler: handleTransferOutETH
+        - event: Unpaused(address)
+          handler: handleUnpaused
+      file: ./src/the-poolz.ts

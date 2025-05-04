@@ -1,0 +1,97 @@
+type FinishPool @entity(immutable: true) {
+  id: Bytes!
+  internal_id: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type NewInvestorEvent @entity(immutable: true) {
+  id: Bytes!
+  Investor_ID: BigInt! # uint256
+  Investor_Address: Bytes! # address
+  LockedDeal_ID: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type NewPool @entity(immutable: true) {
+  id: Bytes!
+  token: Bytes! # address
+  internal_id: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type OwnershipTransferred @entity(immutable: true) {
+  id: Bytes!
+  previousOwner: Bytes! # address
+  newOwner: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Paused @entity(immutable: true) {
+  id: Bytes!
+  account: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type PoolUpdate @entity(immutable: true) {
+  id: Bytes!
+  internal_id: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type TransferIn @entity(immutable: true) {
+  id: Bytes!
+  Amount: BigInt! # uint256
+  From: Bytes! # address
+  Token: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type TransferInETH @entity(immutable: true) {
+  id: Bytes!
+  Amount: BigInt! # uint256
+  From: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type TransferOut @entity(immutable: true) {
+  id: Bytes!
+  Amount: BigInt! # uint256
+  To: Bytes! # address
+  Token: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type TransferOutETH @entity(immutable: true) {
+  id: Bytes!
+  Amount: BigInt! # uint256
+  To: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Unpaused @entity(immutable: true) {
+  id: Bytes!
+  account: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
